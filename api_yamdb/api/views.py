@@ -7,14 +7,14 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from reviews.models import User
-from .serializers import UserSerializer
+from .serializers import UserSerializer, SignupSerializer, TokenSerializer
 from api_yamdb.settings import ADMIN_EMAIL
-
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
     # пермишн лукап филльтр поиск добавить
 
     @action(
@@ -41,7 +41,7 @@ def APISignup(request):
     Create user with unique username and email
     then send confirmation code to email
     """
-    serializer = UserSerializer(data=request.data)
+    serializer = SignupSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
         send_confirmation_code(user)
@@ -70,7 +70,7 @@ def APIToken(request):
 @api_view(['POST'])
 # @permission_classes([AllowAny])
 def APICode(request):
-    serializer = UserSerializer(data=request.data)
+    serializer = TokenSerializer(data=request.data)
     if serializer.is_valid():
         username = serializer.data['username']
         email = serializer.data['email']

@@ -9,7 +9,7 @@ def create_users_api(admin_client):
         'role': 'user',
         'email': 'testuser@yamdb.fake'
     }
-    admin_client.post('/api/v1/users/', data=data)
+    admin_client.post('/api/v1/reviews/', data=data)
     user = get_user_model().objects.get(username=data['username'])
     data = {
         'first_name': 'ModerFirstName',
@@ -19,7 +19,7 @@ def create_users_api(admin_client):
         'role': 'moderator',
         'email': 'testmoder@yamdb.fake'
     }
-    admin_client.post('/api/v1/users/', data=data)
+    admin_client.post('/api/v1/reviews/', data=data)
     moderator = get_user_model().objects.get(username=data['username'])
     return user, moderator
 

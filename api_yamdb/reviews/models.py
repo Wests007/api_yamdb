@@ -40,13 +40,22 @@ class User(AbstractUser):
 
 
 class Genre(models.Model):
-    name = models.TextField('Название',
-                            blank=False,
-                            max_length=150)
-    slug = models.SlugField('Slug',
-                            blank=False,
-                            unique=True,
-                            db_index=True)
+    name = models.TextField(
+        'Название',
+         blank=False,
+         max_length=150
+    )
+    slug = models.SlugField(
+        'Slug',
+         blank=False,
+         unique=True,
+         db_index=True
+    )
+
+    class Meta:
+        ordering = ('id',)
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
 
     def __str__(self):
         return self.name[0:10]
@@ -64,6 +73,11 @@ class Category(models.Model):
         unique=True,
         db_index=True
     )
+
+    class Meta:
+        ordering = ('id',)
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
 
     def __str__(self):
         return self.name[0:10]
@@ -99,8 +113,33 @@ class Title(models.Model):
         blank=True
     )
 
+    class Meta:
+        ordering = ('id',)
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+
     def __str__(self):
         return self.name[0:10]
+
+
+class GenreTitle(models.Model):
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        verbose_name='Произведение'
+    )
+    genre = models.ForeignKey(
+        Genre,
+        on_delete=models.CASCADE,
+        verbose_name='Жанр'
+    )
+
+    class Meta:
+        verbose_name = 'Жанры произведения'
+        verbose_name_plural = 'Жанры произведения'
+
+    def __str__(self):
+        return f'{self.title}, {self.genre}'
 
 
 class Review(models.Model):

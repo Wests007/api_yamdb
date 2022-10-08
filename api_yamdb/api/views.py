@@ -5,10 +5,13 @@ from rest_framework import viewsets, status, generics, permissions, mixins, filt
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework import mixins
+from rest_framework.pagination import LimitOffsetPagination
 
-from reviews.models import User
-from .serializers import UserSerializer, SignupSerializer, TokenSerializer
+from reviews.models import User, Review
+from .serializers import UserSerializer, SignupSerializer, TokenSerializer, ReviewSerializer, CommentSerializer
 from api_yamdb.settings import ADMIN_EMAIL
+from .permissions import IsAuthorOrReadOnly
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -32,6 +35,42 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    http_method_names = ['get', 'post', 'patch', 'delete']
+    permission_classes = [IsAuthorOrReadOnly]
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = CommentSerializer
+    http_method_names = ['get', 'post', 'patch', 'delete']
+    permission_classes = [IsAuthorOrReadOnly]
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+
+# Пока оставлю тут. Проверю вариант выше, если заработает, то уберу
+#
+# class ReviewViewSet(viewsets.ViewSet):
+#     def list(self, request):
+#         queryset = Review.objects.all()
+#         serializer = ReviewSerializer(queryset, many=True)
+#         return Response(serializer.data)
+
+#     def retrieve(self, request, pk=None):
+#         queryset = Review.objects.all()
+#         review = get_object_or_404(queryset, pk=pk)
+#         serializer = ReviewSerializer(review)
+#         return Response(serializer.data)
+#     queryset = Review.objects.all()
+#     serializer_class = ReviewSerializer
 
 
 @api_view(['POST'])

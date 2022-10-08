@@ -8,13 +8,14 @@ from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
+# Я посмотрел ReDoc и вижу, что пагинация везде одинаковая, где она требуется.
+# Поэтому решил выставить в сеттингах на уровне всего проекта. Здесь можно удалять?
 from rest_framework.pagination import (
     PageNumberPagination,
     LimitOffsetPagination
 )
 
-from reviews.models import (User, Category, Genre, Title)
-
+from reviews.models import (User, Category, Genre, Title, Review, Comment)
 from .filters import TitleFilter
 from .serializers import (UserSerializer,
                           SignupSerializer,
@@ -22,10 +23,14 @@ from .serializers import (UserSerializer,
                           CategorySerializer,
                           GenreSerializer,
                           TitleListSerializer,
-                          TitleCreateSerializer)
+                          TitleCreateSerializer,
+                          ReviewSerializer,
+                          CommentSerializer)
 from .mixin import CreateListDestroyViewSet
+# Если удаляем этот пермишен, то импорт тоже не нужен
 from .permissions import IsAdminOrReadOnly
 from api_yamdb.settings import ADMIN_EMAIL
+from .permissions import IsAuthorOrReadOnly
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -49,6 +54,42 @@ class UserViewSet(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    http_method_names = ['get', 'post', 'patch', 'delete']
+    permission_classes = [IsAuthorOrReadOnly]
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    http_method_names = ['get', 'post', 'patch', 'delete']
+    permission_classes = [IsAuthorOrReadOnly]
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+
+# Пока оставлю тут. Проверю вариант выше, если заработает, то уберу
+#
+# class ReviewViewSet(viewsets.ViewSet):
+#     def list(self, request):
+#         queryset = Review.objects.all()
+#         serializer = ReviewSerializer(queryset, many=True)
+#         return Response(serializer.data)
+
+#     def retrieve(self, request, pk=None):
+#         queryset = Review.objects.all()
+#         review = get_object_or_404(queryset, pk=pk)
+#         serializer = ReviewSerializer(review)
+#         return Response(serializer.data)
+#     queryset = Review.objects.all()
+#     serializer_class = ReviewSerializer
 
 
 @api_view(['POST'])

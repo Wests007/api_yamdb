@@ -1,10 +1,11 @@
 from rest_framework import routers
 from django.urls import include, path
 
-from .views import (UserViewSet, APISignup, APICode, APIToken)
+from .views import UserViewSet, APISignup, APICode, APIToken
 
 v1_router = routers.DefaultRouter()
 v1_router.register(r'users', UserViewSet, basename='users')
+# v1_router.register(r'users/(?P<username>[\w.@+-]+)', UserViewSet)
 
 urlpatterns = [
     path('v1/auth/token/', APIToken),

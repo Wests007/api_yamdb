@@ -13,16 +13,17 @@ ROLES_CHOICES = [
 
 
 class User(AbstractUser):
-    username = models.CharField(max_length=50,
+    username = models.CharField(max_length=150,
                                 unique=True,
                                 blank=False,
-                                null=False)
+                                null=False,)
     # тут не забыть сделать валидатор
-    email = models.EmailField(unique=True,
+    email = models.EmailField(max_length=254,
+                              unique=True,
                               blank=False,
                               null=False)
-    first_name = models.CharField(max_length=100, blank=True)
-    last_name = models.CharField(max_length=100, blank=True)
+    first_name = models.CharField(max_length=150, blank=True)
+    last_name = models.CharField(max_length=150, blank=True)
     bio = models.TextField(
         'Биография',
         blank=True,

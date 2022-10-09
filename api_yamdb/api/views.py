@@ -1,26 +1,34 @@
+import random
+
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status, generics, permissions, mixins, filters
 from rest_framework.decorators import api_view, permission_classes, action
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 
-from reviews.models import User
-from .serializers import UserSerializer, SignupSerializer, TokenSerializer
 from api_yamdb.settings import ADMIN_EMAIL
+from reviews.models import User
+from .permissions import AdminRole
+from .serializers import UserSerializer, SignupSerializer, TokenSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-
-    # пермишн лукап филльтр поиск добавить
+    permission_classes = (AdminRole,)
+    filter_backends = (filters.SearchFilter,)
+    lookup_field = 'username'
+    regex = r'[\w\@\.\+\-]+'
+    search_fields = ('username',)
 
     @action(
         detail=False, methods=['get', 'patch'],
         url_path='me', url_name='me',
-        # permission_classes=(IsAuthenticated,)
+        permission_classes=(IsAuthenticated,)
     )
     def about_me(self, request):
         serializer = UserSerializer(request.user)
@@ -35,22 +43,25 @@ class UserViewSet(viewsets.ModelViewSet):
 
 
 @api_view(['POST'])
-# @permission_classes([AllowAny])
+@permission_classes([AllowAny])
 def APISignup(request):
-    """
-    Create user with unique username and email
-    then send confirmation code to email
-    """
     serializer = SignupSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
     if serializer.is_valid():
+        email = serializer.validated_data['email']
+        username = serializer.validated_data['username']
         user = serializer.save()
-        send_confirmation_code(user)
+        confirmation_code = 'test_code'
+        user.confirmation_code = confirmation_code
+        send_mail(
+            'Код подтверждения', confirmation_code,
+            ['admin@gmail.com'], (email,), fail_silently=False
+        )
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
 @api_view(['POST'])
-# @permission_classes([AllowAny])
+@permission_classes([AllowAny])
 def APIToken(request):
     serializer = UserSerializer(data=request.data)
     if not serializer.is_valid():
@@ -58,17 +69,14 @@ def APIToken(request):
     username = serializer.data['username']
     user = get_object_or_404(User, username=username)
     confirmation_code = serializer.data['confirmation_code']
-    if not default_token_generator.check_token(user, confirmation_code):
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    token = RefreshToken.for_user(user)
-    return Response(
-        {'token': str(token.access_token)}, status=status.HTTP_200_OK
-    )
+    if confirmation_code == user.confirmation_code:
+        token = str(AccessToken.for_user(user))
+        return Response({'token': token}, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
-# @permission_classes([AllowAny])
+@permission_classes([AllowAny])
 def APICode(request):
     serializer = TokenSerializer(data=request.data)
     if serializer.is_valid():

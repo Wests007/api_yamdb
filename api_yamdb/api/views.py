@@ -63,7 +63,11 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthorOrReadOnly]
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        title_id = self.kwargs.get("title_id")
+        serializer.save(
+            author=self.request.user,
+            title=get_object_or_404(Title, id=title_id)
+        )
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -71,8 +75,13 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     http_method_names = ['get', 'post', 'patch', 'delete']
     permission_classes = [IsAuthorOrReadOnly]
+    
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        review_id = self.kwargs.get("review_id")
+        serializer.save(
+            author=self.request.user,
+            review=get_object_or_404(Review, id=review_id)
+        )
 
 
 # Пока оставлю тут. Проверю вариант выше, если заработает, то уберу

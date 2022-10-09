@@ -143,6 +143,11 @@ class GenreTitle(models.Model):
 
 
 class Review(models.Model):
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        related_name='reviews'
+    )
     text = models.TextField(
         'Текст отзыва',
     )
@@ -165,8 +170,21 @@ class Review(models.Model):
         db_index=True
     )
 
+    class Meta:
+        ordering = ('id',)
+        verbose_name = 'Отзыв на произведение'
+        verbose_name_plural = 'Отзывы на произведения'
+
+    def __str__(self):
+        return self.text[0:10]
+
 
 class Comment(models.Model):
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE,
+        related_name='comments'
+    )
     text = models.TextField(
         'Текст комментария',
     )
@@ -180,3 +198,11 @@ class Comment(models.Model):
         auto_now_add=True,
         db_index=True
     )
+
+    class Meta:
+        ordering = ('id',)
+        verbose_name = 'Комментарий на отзыв'
+        verbose_name_plural = 'Комментарии на отзывы'
+
+    def __str__(self):
+        return self.text[0:10]

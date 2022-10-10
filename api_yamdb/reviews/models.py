@@ -43,8 +43,23 @@ class User(AbstractUser):
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 
+    REQUIRED_FIELDS = ['email']
+    USERNAME_FIELDS = 'email'
+
     def __str__(self):
-        return self.username
+        return str(self.username)
+
+    @property
+    def is_admin(self):
+        return self.role == "admin" or self.is_superuser
+
+    @property
+    def is_moderator(self):
+        return self.role == "moderator"
+
+    @property
+    def is_user(self):
+        return self.role == "user"
 
 
 class Genre(models.Model):

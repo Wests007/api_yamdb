@@ -1,6 +1,6 @@
 import os
 
-from tests.conftest import MANAGE_PATH, project_dir_content, root_dir_content
+from .conftest import MANAGE_PATH, project_dir_content, root_dir_content
 
 # проверяем, что в папки приложения api не находятся модели
 api_path = os.path.join(MANAGE_PATH, 'api')
@@ -15,13 +15,13 @@ else:
 
 
 # test .md
-default_md = '# 1api_yamdb\napi_yamdb\n'
+default_md = '# api_yamdb\napi_yamdb\n'
 filename = 'README.md'
 assert filename in root_dir_content, (
     f'В корне проекта не найден файл `{filename}`'
 )
 
-with open(filename, 'r') as f:
+with open(filename, 'r', encoding='utf-8') as f:
     file = f.read()
     assert file != default_md, (
         f'Не забудьте оформить `{filename}`'

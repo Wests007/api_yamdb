@@ -3,8 +3,27 @@ from django.urls import include, path
 
 from .views import UserViewSet, APISignup, APICode, APIToken
 
-v1_router = DefaultRouter()
-v1_router.register('users', UserViewSet)
+v1_router = routers.DefaultRouter()
+v1_router.register(r'users', UserViewSet, basename='users')
+v1_router.register(
+    r'titles/(?P<title_id>\d+)/reviews',
+    ReviewViewSet,
+    basename='reviews'
+)
+v1_router.register(
+    r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
+    CommentViewSet,
+    basename='comments'
+)
+# Оставил эти урлы, но тут что-то не то.
+# Зачем создавать эндпойнты genres/<slug:slug> и categories/<slug:slug>? По идее вьюсет это делает сам.
+# Так же не совсем ясно зачем в качестве basename указываем ...ViewSet?
+# По идее basename это то имя, которое будет в урле при доступе к эндпойнту.
+# На мой взгляд правильнее basename указан для эндпойнтов выше.
+v1_router.register('categories', CategoryViewSet, basename='categories')
+v1_router.register('genres', GenreViewSet, basename='genres')
+# v1_router.register('categories/<slug:slug>', CategoryViewSet, basename=CategoryViewSet)
+# v1_router.register('genres/<slug:slug>', GenreViewSet, basename=GenreViewSet)
 
 urlpatterns = [
     path('v1/auth/token/', APIToken),

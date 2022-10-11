@@ -2,7 +2,7 @@ import csv
 
 from reviews.models import (User, Genre, Category, Title,
                             GenreTitle, Review, Comment)
-from api_yamdb.settings import DATA_IMPORT_LOCATION
+from api_yamdb.api_yamdb.settings import DATA_IMPORT_LOCATION
 
 
 def users_to_db(self):

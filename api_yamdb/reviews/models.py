@@ -14,29 +14,52 @@ ROLES_CHOICES = [
 
 
 class User(AbstractUser):
-    username = models.CharField(max_length=50,
+    username = models.CharField(max_length=150,
                                 unique=True,
                                 blank=False,
-                                null=False)
+                                null=False,)
     # тут не забыть сделать валидатор
-    email = models.EmailField(unique=True,
+    email = models.EmailField(max_length=254,
+                              unique=True,
                               blank=False,
                               null=False)
-    first_name = models.CharField(max_length=100, blank=True)
-    last_name = models.CharField(max_length=100, blank=True)
+    first_name = models.CharField(max_length=150, blank=True)
+    last_name = models.CharField(max_length=150, blank=True)
     bio = models.TextField(
         'Биография',
         blank=True,
     )
     role = models.CharField(max_length=9, choices=ROLES_CHOICES, default=USER)
+    confirmation_code = models.CharField(
+        'код подтверждения',
+        max_length=255,
+        null=True,
+        blank=False,
+        default='UNKNOWN'
+    )
 
     class Meta:
         ordering = ('id',)
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 
+    REQUIRED_FIELDS = ['email']
+    USERNAME_FIELDS = 'email'
+
     def __str__(self):
-        return self.username
+        return str(self.username)
+
+    @property
+    def is_admin(self):
+        return self.role == "admin" or self.is_superuser
+
+    @property
+    def is_moderator(self):
+        return self.role == "moderator"
+
+    @property
+    def is_user(self):
+        return self.role == "user"
 
 
 class Genre(models.Model):

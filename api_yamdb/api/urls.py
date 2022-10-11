@@ -28,10 +28,10 @@ v1_router.register(
 # Так же не совсем ясно зачем в качестве basename указываем ...ViewSet?
 # По идее basename это то имя, которое будет в урле при доступе к эндпойнту.
 # На мой взгляд правильнее basename указан для эндпойнтов выше.
-v1_router.register('categories', CategoryViewSet, basename='categories')
-v1_router.register('genres', GenreViewSet, basename='genres')
-# v1_router.register('categories/<slug:slug>', CategoryViewSet, basename=CategoryViewSet)
-# v1_router.register('genres/<slug:slug>', GenreViewSet, basename=GenreViewSet)
+v1_router.register('categories', CategoryViewSet, basename=CategoryViewSet)
+v1_router.register('genres', GenreViewSet, basename=GenreViewSet)
+v1_router.register('categories/<slug:slug>', CategoryViewSet, basename=CategoryViewSet)
+v1_router.register('genres/<slug:slug>', GenreViewSet, basename=GenreViewSet)
 
 urlpatterns = [
     path('v1/auth/token/', APIToken),

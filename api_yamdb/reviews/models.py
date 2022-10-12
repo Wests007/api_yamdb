@@ -9,34 +9,66 @@ ROLES_CHOICES = [
     (ADMIN, ADMIN),
     (MODERATOR, MODERATOR),
     (USER, USER)
-
 ]
 
 
 class User(AbstractUser):
-    username = models.CharField(max_length=50,
-                                unique=True,
-                                blank=False,
-                                null=False)
+    #А нужны поля: юзернейм, емэйл, имя и фамилия? Они в стандартной модели есть
+    username = models.CharField(
+        max_length=150,
+        unique=True,
+        blank=False,
+        null=False
+    )
     # тут не забыть сделать валидатор
-    email = models.EmailField(unique=True,
-                              blank=False,
-                              null=False)
-    first_name = models.CharField(max_length=100, blank=True)
-    last_name = models.CharField(max_length=100, blank=True)
+    email = models.EmailField(
+        max_length=254,
+        unique=True,
+        blank=False,
+        null=False
+    )
+    first_name = models.CharField(max_length=150, blank=True)
+    last_name = models.CharField(max_length=150, blank=True)
     bio = models.TextField(
         'Биография',
         blank=True,
     )
     role = models.CharField(max_length=9, choices=ROLES_CHOICES, default=USER)
+    confirmation_code = models.CharField(
+        'код подтверждения',
+        max_length=255,
+        null=True,
+        blank=False,
+        default='UNKNOWN'
+    )
+
 
     class Meta:
         ordering = ('id',)
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 
+    REQUIRED_FIELDS = ['email']
+    # Почему USERNAME_FIELDS = 'email'? Разве не USERNAME_FIELDS = 'username'?
+    USERNAME_FIELDS = 'email'
+
     def __str__(self):
         return self.username
+
+    # Суперюзер и админ не одно и тоже.
+    # В ТЗ было сказано, что даже если поменять роль суперюзеру на более низкую,
+    # то он все равно должен остаться со всеми правами
+    @property
+    def is_admin(self):
+        return self.role == 'admin' or self.is_superuser
+
+    @property
+    def is_moderator(self):
+        return self.role == 'moderator'
+
+    @property
+    def is_user(self):
+        return self.role == 'user'
 
 
 class Genre(models.Model):
@@ -68,7 +100,7 @@ class Category(models.Model):
         max_length=150
     )
     slug = models.SlugField(
-        'slug',
+        'Slug',
         blank=False,
         unique=True,
         db_index=True
@@ -90,7 +122,7 @@ class Title(models.Model):
         max_length=200,
         db_index=True
     )
-    year = models.IntegerField('год', blank=True)
+    year = models.PositiveSmallIntegerField('год', blank=True)
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
@@ -136,7 +168,7 @@ class GenreTitle(models.Model):
 
     class Meta:
         verbose_name = 'Жанры произведения'
-        verbose_name_plural = 'Жанры произведения'
+        verbose_name_plural = 'Жанры произведений'
 
     def __str__(self):
         return f'{self.title}, {self.genre}'
@@ -185,9 +217,7 @@ class Comment(models.Model):
         on_delete=models.CASCADE,
         related_name='comments'
     )
-    text = models.TextField(
-        'Текст комментария',
-    )
+    text = models.TextField()
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

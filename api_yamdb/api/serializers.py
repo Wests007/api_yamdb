@@ -1,7 +1,8 @@
 import datetime
 
 from rest_framework import serializers
-from reviews.models import User, GenreTitle, Title, Category, Genre, Review, Comment
+from reviews.models import (User, GenreTitle, Title, Category,
+                            Genre, Review, Comment)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -22,7 +23,6 @@ class UserSerializer(serializers.ModelSerializer):
             )
         return value
 
-
 class SignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -35,13 +35,11 @@ class SignupSerializer(serializers.ModelSerializer):
             )
         return value
 
-
 class TokenSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
 
     class Meta:
-        model = User
         fields = ('username', 'confirmation_code')
 
 
@@ -50,26 +48,19 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ('name', 'slug')
 
-
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
         fields = ('name', 'slug')
 
-
 class TitleListSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True, read_only=True)
     category = CategorySerializer(read_only=True)
-    rating = serializers.SerializerMethodField()
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Title
         fields = '__all__'
-
-    def get_rating(self, obj):
-
-        return 4
-
 
 class TitleCreateSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(

@@ -13,7 +13,8 @@ ROLES_CHOICES = [
 
 
 class User(AbstractUser):
-    #А нужны поля: юзернейм, емэйл, имя и фамилия? Они в стандартной модели есть
+    #А нужны поля: юзернейм, емэйл, имя и фамилия? Они в стандартной модели есть.
+    # Посмотреть документацию! is_superuser!!!
     username = models.CharField(
         max_length=150,
         unique=True,
@@ -50,7 +51,7 @@ class User(AbstractUser):
 
     REQUIRED_FIELDS = ['email']
     # Почему USERNAME_FIELDS = 'email'? Разве не USERNAME_FIELDS = 'username'?
-    USERNAME_FIELDS = 'email'
+    USERNAME_FIELDS = 'username'
 
     def __str__(self):
         return self.username
@@ -60,7 +61,7 @@ class User(AbstractUser):
     # то он все равно должен остаться со всеми правами
     @property
     def is_admin(self):
-        return self.role == 'admin' or self.is_superuser
+        return self.role == 'admin'
 
     @property
     def is_moderator(self):

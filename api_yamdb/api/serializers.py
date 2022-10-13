@@ -4,13 +4,42 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
 from reviews.models import (User, GenreTitle, Title, Category,
-                            Genre, Review, Comment)
+                            Genre, Review, Comment, ROLES_CHOICES)
 
 
 class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(required=True)
     email = serializers.CharField(required=True)
-    role = serializers.StringRelatedField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = (
+            'username', 'email', 'first_name', 'last_name', 'bio', 'role',
+        )
+
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Имя пользователя "me" не разрешено.'
+            )
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError(
+                'username должен быть уникален',
+            )
+        return value
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError(
+                'email должен быть уникален',
+            )
+        return value
+
+
+class UserSerializerForUser(serializers.ModelSerializer):
+    username = serializers.CharField(required=True)
+    email = serializers.CharField(required=True)
+    role = serializers.CharField(read_only=True)
 
     class Meta:
         model = User
@@ -25,6 +54,14 @@ class UserSerializer(serializers.ModelSerializer):
             )
         return value
 
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError(
+                'email не уникален',
+            )
+        return value
+
+
 class SignupSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -36,6 +73,7 @@ class SignupSerializer(serializers.ModelSerializer):
                 'Имя пользователя "me" не разрешено.'
             )
         return value
+
 
 class TokenSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
@@ -99,16 +137,26 @@ class ReviewSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('id', 'text', 'author', 'score', 'pub_date')
         model = Review
+        fields = ('id', 'text', 'author', 'score', 'pub_date')
 
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Review.objects.all(),
-                fields=('title', 'author'),
-                message='Вы уже оставили отзыв на данное произведение.'
-            )
-        ]
+    def validate(self, data):
+        if self.context['request'].method == 'POST':
+            title_id = self.context['request'].parser_context['kwargs']['title_id']
+            author = self.context['request'].user
+            if Review.objects.filter(
+                    author=author, title=title_id).exists():
+                raise serializers.ValidationError(
+                    'Вы уже написали отзыв к этому произведению.'
+                )
+        return data
+        # validators = [
+        #     UniqueTogetherValidator(
+        #         queryset=Review.objects.all(),
+        #         fields=('title', 'author'),
+        #         message='Вы уже оставили отзыв на данное произведение.'
+        #     )
+        # ]
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -118,14 +166,14 @@ class CommentSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('id', 'text', 'author', 'pub_date')
         model = Comment
+        fields = ('id', 'text', 'author', 'pub_date')
 
 
-class NotAdminSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = (
-            'username', 'email', 'first_name',
-            'last_name', 'bio', 'role')
-        read_only_fields = ('role',)
+# class NotAdminSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = (
+#             'username', 'email', 'first_name',
+#             'last_name', 'bio', 'role')
+#         read_only_fields = ('role',)

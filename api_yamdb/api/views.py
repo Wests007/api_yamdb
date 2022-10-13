@@ -78,11 +78,14 @@ class UserViewSet(viewsets.ModelViewSet):
 
 def send_confirmation_code(user):
     confirmation_code = default_token_generator.make_token(user)
-    subject = 'Код'
-    message = f'{confirmation_code} - ваш код '
+    subject = 'Код подтверждения для получения токена'
+    message = (f'Спасибо за регистрацию! Ниже Вы найдете код подтверждения '
+               f'для получения токена. Ваш логин: {user.username},'
+               f'email: {user.email}. Код для токена:{confirmation_code}')
     admin_email = 'admin@mail.ru'
     user_email = [user.email]
-    return send_mail(subject, message, admin_email, user_email)
+    send_mail(subject, message, admin_email, user_email)
+    return str(confirmation_code)
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -90,8 +93,8 @@ def apisignup(request):
     serializer = SignupSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
-        User.objects.get_or_create(**serializer.validated_data)
-        send_confirmation_code(user)
+        user_save_code = get_object_or_404(User, username=user.username)
+        user_save_code.confirmation_code = send_confirmation_code(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -99,13 +102,14 @@ def apisignup(request):
 @permission_classes([AllowAny])
 def apitoken(request):
     serializer = TokenSerializer(data=request.data)
-    if not serializer.is_valid():
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    # username = serializer.validated_data['username']
-    # confirmation_code = serializer.validated_data['confirmation_code']
-    username = serializer.data['username']
-    confirmation_code = serializer.data['confirmation_code']
+    serializer.is_valid()
+    username = serializer.validated_data['username']
+    confirmation_code = serializer.validated_data['confirmation_code']
+    print(f'username из запроса:{username}')
+    print(f'confirmation_code из запроса:{confirmation_code}')
     user_base = get_object_or_404(User, username=username)
+    print(f'username из БД:{user_base.username}')
+    print(f'confirmation_code из БД:{user_base.confirmation_code}')
     if confirmation_code == user_base.confirmation_code:
         token = str(AccessToken.for_user(user_base))
         return Response({'token': token}, status=status.HTTP_201_CREATED)
@@ -132,17 +136,17 @@ class ReviewViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthor|IsModerator|ReadOnly|
                           IsAdmin|IsSuperUser]
 
-    # def get_queryset(self):
-    #     title_id = self.kwargs.get('title_id')
-    #     title = get_object_or_404(Title, id=title_id)
-    #     return title.reviews.all()
-    
     def perform_create(self, serializer):
         title_id = self.kwargs.get("title_id")
         serializer.save(
             author=self.request.user,
             title=get_object_or_404(Title, id=title_id) 
         )
+
+    def get_queryset(self):
+        title_id = self.kwargs.get('title_id')
+        title = get_object_or_404(Title, id=title_id)
+        return title.reviews.all()
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -159,6 +163,11 @@ class CommentViewSet(viewsets.ModelViewSet):
             review=get_object_or_404(Review, id=review_id)
         )
 
+    def get_queryset(self):
+        review_id = self.kwargs.get('review_id')
+        review = get_object_or_404(Review, id=review_id)
+        return review.comments.all()
+
 
 class CategoryViewSet(CreateListDestroyViewSet):
     queryset = Category.objects.all()
@@ -168,6 +177,7 @@ class CategoryViewSet(CreateListDestroyViewSet):
     lookup_field = 'slug'
     search_fields = ('name',)
 
+
 class GenreViewSet(CreateListDestroyViewSet):
     serializer_class = GenreSerializer
     queryset = Genre.objects.all()
@@ -175,6 +185,7 @@ class GenreViewSet(CreateListDestroyViewSet):
     filter_backends = [filters.SearchFilter]
     lookup_field = 'slug'
     search_fields = ('name', 'slug')
+
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(

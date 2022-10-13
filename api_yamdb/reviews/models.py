@@ -56,9 +56,6 @@ class User(AbstractUser):
     def __str__(self):
         return self.username
 
-    # Суперюзер и админ не одно и тоже.
-    # В ТЗ было сказано, что даже если поменять роль суперюзеру на более низкую,
-    # то он все равно должен остаться со всеми правами
     @property
     def is_admin(self):
         return self.role == 'admin'

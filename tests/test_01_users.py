@@ -8,10 +8,10 @@ class Test01UserAPI:
 
     @pytest.mark.django_db(transaction=True)
     def test_01_users_not_authenticated(self, client):
-        response = client.get('/api/v1/reviews/')
+        response = client.get('/api/v1/users/')
 
         assert response.status_code != 404, (
-            'Страница `/api/v1/reviews/` не найдена, проверьте этот адрес в *urls.py*'
+            'Страница `/api/v1/users/` не найдена, проверьте этот адрес в *urls.py*'
         )
 
         assert response.status_code == 401, (

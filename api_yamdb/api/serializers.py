@@ -50,10 +50,12 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ('name', 'slug')
 
+
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         model = Genre
         fields = ('name', 'slug')
+
 
 class TitleListSerializer(serializers.ModelSerializer):
     genre = GenreSerializer(many=True, read_only=True)
@@ -63,6 +65,7 @@ class TitleListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Title
         fields = '__all__'
+
 
 class TitleCreateSerializer(serializers.ModelSerializer):
     category = serializers.SlugRelatedField(
@@ -117,3 +120,12 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('id', 'text', 'author', 'pub_date')
         model = Comment
+
+
+class NotAdminSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'username', 'email', 'first_name',
+            'last_name', 'bio', 'role')
+        read_only_fields = ('role',)

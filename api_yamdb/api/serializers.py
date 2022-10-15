@@ -1,10 +1,9 @@
 import datetime
 
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator
 
-from reviews.models import (User, GenreTitle, Title, Category,
-                            Genre, Review, Comment, ROLES_CHOICES)
+from reviews.models import (User, Title, Category,
+                            Genre, Review, Comment)
 
 
 class UserSerializer(serializers.ModelSerializer):

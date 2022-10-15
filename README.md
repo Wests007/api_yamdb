@@ -13,7 +13,7 @@ Django 2.2.19
 Клонировать репозиторий и перейти в него в командной строке:
 
 ```
-git clone ТУТ АДРЕСА НАШИХ РЕПОЗИТОРИЕВ
+git clone https://github.com/Wests007/api_yamdb.git
 ```
 
 ```
@@ -43,6 +43,10 @@ pip install -r requirements.txt
 Выполнить миграции:
 
 ```
+cd api_yamdb
+```
+
+```
 python manage.py migrate
 ```
 
@@ -58,31 +62,109 @@ python manage.py import_csv_to_db
 python manage.py runserver
 ```
 
-### Ниже все необходимо поправить под данный проект!!!
-### Примеры запросов к API:
+### Документация запросов к API доступна после запуска сервера по адресу:
 
-- Получение публикаций
+```
+127.0.0.1:8000/redoc
+```
 
-GET /api/v1/posts/
+### Регистрация пользователя и получение токена:
+
+- Регистрация
+
+POST /api/v1/auth/signup/
 ```
 {
-    "count": 123,
-    "next": "http://api.example.org/accounts/?offset=400&limit=100",
-    "previous": "http://api.example.org/accounts/?offset=200&limit=100",
-    "results": [
-        {...}
-    ]
+    "email": "string",
+    "username": "string"
 }
 ```
 
-- Создание публикации
+- Получение токена
 
-POST /api/v1/posts/
+POST /api/v1/auth/token/
+```
+{
+    "username": "string",
+    "confirmation_code": "string"
+}
+```
 
+- Редактирование пользовательского профиля
+
+PATCH /api/v1/users/me/
+```
+{
+    "username": "string",
+    "email": "user@example.com",
+    "first_name": "string",
+    "last_name": "string",
+    "bio": "string"
+}
+```
+
+### Примеры некоторых запросов к API:
+
+- Получение списка всех категорий
+
+GET /api/v1/categories/
+```
+[
+    {
+        "count": 0,
+        "next": "string",
+        "previous": "string",
+        "results":
+            [
+                {
+                    "name": "string",
+                    "slug": "string"
+                }
+            ]
+    }
+]
+```
+
+- Получение списка всех жанров
+
+GET /api/v1/genres/
+```
+[
+    {
+        "count": 0,
+        "next": "string",
+        "previous": "string",
+        "results":
+            [
+                {
+                    "name": "string",
+                    "slug": "string"
+                }
+            ]
+    }
+]
+```
+
+- Добавление нового отзыва
+
+POST /api/v1/titles/{title_id}/reviews/
 ```
 {
     "text": "string",
-    "image": "string",
-    "group": 0
+    "score": 1
 }
 ```
+
+- Добавление комментария к отзыву
+
+POST /api/v1/titles/{title_id}/reviews/{review_id}/comments/
+```
+{
+    "text": "string"
+}
+```
+
+## Авторы проекта:
+[Асеев Александр](https://github.com/VANGAZOR)
+[Гриднев Кирилл](https://github.com/Keyreall96)
+[Ромашков Александр](https://github.com/Wests007)

@@ -13,15 +13,12 @@ ROLES_CHOICES = [
 
 
 class User(AbstractUser):
-    #А нужны поля: юзернейм, емэйл, имя и фамилия? Они в стандартной модели есть.
-    # Посмотреть документацию! is_superuser!!!
     username = models.CharField(
         max_length=150,
         unique=True,
         blank=False,
         null=False
     )
-    # тут не забыть сделать валидатор
     email = models.EmailField(
         max_length=254,
         unique=True,
@@ -50,7 +47,6 @@ class User(AbstractUser):
         verbose_name_plural = 'Пользователи'
 
     REQUIRED_FIELDS = ['email']
-    # Почему USERNAME_FIELDS = 'email'? Разве не USERNAME_FIELDS = 'username'?
     USERNAME_FIELDS = 'username'
 
     def __str__(self):
@@ -165,6 +161,7 @@ class GenreTitle(models.Model):
     )
 
     class Meta:
+        ordering = ('id',)
         verbose_name = 'Жанры произведения'
         verbose_name_plural = 'Жанры произведений'
 

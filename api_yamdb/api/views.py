@@ -5,9 +5,10 @@ from django.db.models import Avg
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import api_view, action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework_simplejwt.tokens import  RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from reviews.models import User, Category, Genre, Title, Review, Comment
 from .filters import TitleFilter
@@ -49,6 +50,7 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+
 def send_confirmation_code(user):
     confirmation_code = default_token_generator.make_token(user)
     subject = 'Код подтверждения для получения токена'
@@ -65,7 +67,7 @@ def apisignup(request):
     serializer = SignupSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
-        user.confirmation_code = send_confirmation_code(user) 
+        user.confirmation_code = send_confirmation_code(user)
         user.save()
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -91,14 +93,14 @@ class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     http_method_names = ['get', 'post', 'patch', 'delete']
     permission_classes = [
-        IsAuthorAdminModeratorSuperUserOrReadOnly&IsAuthenticatedOrReadOnly
+        IsAuthorAdminModeratorSuperUserOrReadOnly & IsAuthenticatedOrReadOnly
     ]
 
     def perform_create(self, serializer):
         title_id = self.kwargs.get("title_id")
         serializer.save(
             author=self.request.user,
-            title=get_object_or_404(Title, id=title_id) 
+            title=get_object_or_404(Title, id=title_id)
         )
 
     def get_queryset(self):
@@ -112,9 +114,9 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     http_method_names = ['get', 'post', 'patch', 'delete']
     permission_classes = [
-        IsAuthorAdminModeratorSuperUserOrReadOnly&IsAuthenticatedOrReadOnly
+        IsAuthorAdminModeratorSuperUserOrReadOnly & IsAuthenticatedOrReadOnly
     ]
-    
+
     def perform_create(self, serializer):
         review_id = self.kwargs.get("review_id")
         serializer.save(
@@ -131,7 +133,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(CreateListDestroyViewSet):
     queryset = Category.objects.all().order_by('id')
     serializer_class = CategorySerializer
-    permission_classes = [IsSuperUserOrAdmin|ReadOnly]
+    permission_classes = [IsSuperUserOrAdmin | ReadOnly]
     filter_backends = (filters.SearchFilter,)
     lookup_field = 'slug'
     search_fields = ('name',)
@@ -140,7 +142,7 @@ class CategoryViewSet(CreateListDestroyViewSet):
 class GenreViewSet(CreateListDestroyViewSet):
     serializer_class = GenreSerializer
     queryset = Genre.objects.all().order_by('id')
-    permission_classes = [IsSuperUserOrAdmin|ReadOnly]
+    permission_classes = [IsSuperUserOrAdmin | ReadOnly]
     filter_backends = [filters.SearchFilter]
     lookup_field = 'slug'
     search_fields = ('name', 'slug')
@@ -151,7 +153,7 @@ class TitleViewSet(viewsets.ModelViewSet):
         rating=Avg('reviews__score')
     ).all().order_by('id')
     serializer_class = TitleListSerializer
-    permission_classes = [IsSuperUserOrAdmin|ReadOnly]
+    permission_classes = [IsSuperUserOrAdmin | ReadOnly]
     filter_backends = (DjangoFilterBackend,)
     search_fields = ('genre',)
     filterset_class = TitleFilter

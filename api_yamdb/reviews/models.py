@@ -40,7 +40,6 @@ class User(AbstractUser):
         default='UNKNOWN'
     )
 
-
     class Meta:
         ordering = ('id',)
         verbose_name = 'Пользователь'
@@ -68,14 +67,14 @@ class User(AbstractUser):
 class Genre(models.Model):
     name = models.TextField(
         'Название',
-         blank=False,
-         max_length=150
+        blank=False,
+        max_length=150
     )
     slug = models.SlugField(
         'Slug',
-         blank=False,
-         unique=True,
-         db_index=True
+        blank=False,
+        unique=True,
+        db_index=True
     )
 
     class Meta:
@@ -201,7 +200,10 @@ class Review(models.Model):
         ordering = ('id',)
         verbose_name = 'Отзыв на произведение'
         verbose_name_plural = 'Отзывы на произведения'
-        constraints = [models.UniqueConstraint(fields=['title', 'author'], name='unique_author_review')]
+        constraints = [
+            models.UniqueConstraint(fields=['title', 'author'],
+            name='unique_author_review')
+        ]
 
     def __str__(self):
         return self.text[0:10]

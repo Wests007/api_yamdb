@@ -141,7 +141,8 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         if self.context['request'].method == 'POST':
-            title_id = self.context['request'].parser_context['kwargs']['title_id']
+            title_id = (self.context['request'].
+                        parser_context['kwargs']['title_id'])
             author = self.context['request'].user
             if Review.objects.filter(
                     author=author, title=title_id).exists():

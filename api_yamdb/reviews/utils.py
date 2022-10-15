@@ -12,7 +12,7 @@ def users_to_db(self):
         encoding='utf-8'
     ) as users_csv:
         dataReader = csv.DictReader(users_csv)
-        
+
         for row in dataReader:
             user = User()
             user.id = row['id']
@@ -41,6 +41,7 @@ def users_to_db(self):
                     f'Пользователь {user.username} внесен в базу.'
                 )
 
+
 def genres_to_db(self):
     with open(
         f'{DATA_IMPORT_LOCATION}/genre.csv',
@@ -48,7 +49,7 @@ def genres_to_db(self):
         encoding='utf-8'
     ) as genre_csv:
         dataReader = csv.DictReader(genre_csv)
-        
+
         for row in dataReader:
             genre = Genre()
             genre.id = row['id']
@@ -72,6 +73,7 @@ def genres_to_db(self):
                     f'Жанр {genre.name} внесен в базу.'
                 )
 
+
 def categories_to_db(self):
     with open(
         f'{DATA_IMPORT_LOCATION}/category.csv',
@@ -79,7 +81,7 @@ def categories_to_db(self):
         encoding='utf-8'
     ) as category_csv:
         dataReader = csv.DictReader(category_csv)
-        
+
         for row in dataReader:
             category = Category()
             category.id = row['id']
@@ -103,6 +105,7 @@ def categories_to_db(self):
                     f'Категория {category.name} внесена в базу.'
                 )
 
+
 def titles_to_db(self):
     with open(
         f'{DATA_IMPORT_LOCATION}/titles.csv',
@@ -110,7 +113,7 @@ def titles_to_db(self):
         encoding='utf-8'
     ) as titles_csv:
         dataReader = csv.DictReader(titles_csv)
-        
+
         for row in dataReader:
             try:
                 title = Title()
@@ -142,6 +145,7 @@ def titles_to_db(self):
                     f'Сначала добавьте данную категорию в базу!'
                 )
 
+
 def genres_titles_to_db(self):
     with open(
         f'{DATA_IMPORT_LOCATION}/genre_title.csv',
@@ -149,7 +153,7 @@ def genres_titles_to_db(self):
         encoding='utf-8'
     ) as genre_title_csv:
         dataReader = csv.DictReader(genre_title_csv)
-        
+
         for row in dataReader:
             try:
                 genre_title = GenreTitle()
@@ -185,6 +189,7 @@ def genres_titles_to_db(self):
                     f'Сначала добавьте их в базу!'
                 )
 
+
 def reviews_to_db(self):
     with open(
         f'{DATA_IMPORT_LOCATION}/review.csv',
@@ -192,7 +197,7 @@ def reviews_to_db(self):
         encoding='utf-8'
     ) as review_csv:
         dataReader = csv.DictReader(review_csv)
-        
+
         for row in dataReader:
             try:
                 review = Review()
@@ -229,6 +234,7 @@ def reviews_to_db(self):
                     f'Сначала добавьте их в базу!'
                 )
 
+
 def comments_to_db(self):
     with open(
         f'{DATA_IMPORT_LOCATION}/comments.csv',
@@ -236,7 +242,7 @@ def comments_to_db(self):
         encoding='utf-8'
     ) as comments_csv:
         dataReader = csv.DictReader(comments_csv)
-        
+
         for row in dataReader:
             try:
                 comment = Comment()

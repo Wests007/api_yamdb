@@ -150,13 +150,6 @@ class ReviewSerializer(serializers.ModelSerializer):
                     'Вы уже написали отзыв к этому произведению.'
                 )
         return data
-        # validators = [
-        #     UniqueTogetherValidator(
-        #         queryset=Review.objects.all(),
-        #         fields=('title', 'author'),
-        #         message='Вы уже оставили отзыв на данное произведение.'
-        #     )
-        # ]
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -168,12 +161,3 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ('id', 'text', 'author', 'pub_date')
-
-
-# class NotAdminSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = User
-#         fields = (
-#             'username', 'email', 'first_name',
-#             'last_name', 'bio', 'role')
-#         read_only_fields = ('role',)

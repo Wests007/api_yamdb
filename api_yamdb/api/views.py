@@ -9,9 +9,9 @@ from rest_framework import viewsets, status, filters
 from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework_simplejwt.tokens import  AccessToken
+from rest_framework_simplejwt.tokens import  AccessToken, RefreshToken
 
 from reviews.models import User, Category, Genre, Title, Review, Comment
 from .filters import TitleFilter
@@ -29,11 +29,7 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAdmin|IsSuperUser]
-    # filter_backends = (filters.SearchFilter,)
-    # filterset_fields = ('username')
     lookup_field = 'username'
-    # regex = r'[\w\@\.\+\-]+'
-    # search_fields = ('username',)
 
     @action(
         detail=False, methods=['get', 'patch'],
@@ -68,7 +64,6 @@ def send_confirmation_code(user):
 
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
 def apisignup(request):
     serializer = SignupSerializer(data=request.data)
     if serializer.is_valid():
@@ -80,38 +75,25 @@ def apisignup(request):
 
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
 def apitoken(request):
     serializer = TokenSerializer(data=request.data)
-    serializer.is_valid()
-    username = serializer.validated_data['username']
-    confirmation_code = serializer.validated_data['confirmation_code']
-    user = get_object_or_404(User, username=username)
-    if confirmation_code == user.confirmation_code:
-        token = str(AccessToken.for_user(user))
-        return Response({'token': token}, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-# @api_view(['POST'])
-# @permission_classes([AllowAny])
-# def apicode(request):
-#     serializer = UserSerializer(data=request.data)
-#     if serializer.is_valid():
-#         username = serializer.data['username']
-#         email = serializer.data['email']
-#         user = get_object_or_404(User, username=username, email=email)
-#         send_confirmation_code(user)
-#         return Response(serializer.data, status=status.HTTP_200_OK)
-#     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer.is_valid(raise_exception=True)
+    data = serializer.validated_data
+    user = get_object_or_404(User, username=data['username'])
+    if data.get('confirmation_code') == user.confirmation_code:
+        token = RefreshToken.for_user(user).access_token
+        return Response({'token': str(token)},
+                        status=status.HTTP_201_CREATED)
+    return Response(
+        {'confirmation_code': 'Неверный код подтверждения!'},
+        status=status.HTTP_400_BAD_REQUEST)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
     http_method_names = ['get', 'post', 'patch', 'delete']
-    permission_classes = [IsAuthor|IsModerator|ReadOnly|
-                          IsAdmin|IsSuperUser]
+    permission_classes = [IsAuthor|ReadOnly|IsSuperUser|IsAdmin|IsModerator]
 
     def perform_create(self, serializer):
         title_id = self.kwargs.get("title_id")
@@ -130,8 +112,9 @@ class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     http_method_names = ['get', 'post', 'patch', 'delete']
-    permission_classes = [IsAuthor|IsModerator|ReadOnly|
-                          IsAdmin|IsSuperUser]
+    # permission_classes = [IsAuthor|ReadOnly|IsSuperUser|IsAdmin|IsModerator]
+    
+    permission_classes = [IsAuthor|ReadOnly]
     
     def perform_create(self, serializer):
         review_id = self.kwargs.get("review_id")
@@ -168,9 +151,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(
         rating=Avg('reviews__score')
     ).all()
-    # queryset = Title.objects.all().annotate(
-    #     Avg('reviews__score')
-    # ).order_by('name')
     serializer_class = TitleListSerializer
     permission_classes = [IsAdmin|IsSuperUser|ReadOnly]
     filter_backends = (DjangoFilterBackend,)

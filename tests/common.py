@@ -113,3 +113,4 @@ def create_comments(admin_client, admin):
     result.append({'id': create_comment(client_moderator, titles[0]["id"], reviews[0]["id"], 'qwerty321'),
                    'author': moderator.username, 'text': 'qwerty321'})
     return result, reviews, titles, user, moderator
+    

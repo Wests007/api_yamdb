@@ -7,8 +7,8 @@ from reviews.models import (User, Title, Category,
 
 
 class UserSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(required=True)
-    email = serializers.CharField(required=True)
+    username = serializers.CharField()
+    email = serializers.CharField()
 
     class Meta:
         model = User
@@ -36,8 +36,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class UserSerializerForUser(serializers.ModelSerializer):
-    username = serializers.CharField(required=True)
-    email = serializers.CharField(required=True)
+    username = serializers.CharField()
+    email = serializers.CharField()
     role = serializers.CharField(read_only=True)
 
     class Meta:
@@ -75,8 +75,8 @@ class SignupSerializer(serializers.ModelSerializer):
 
 
 class TokenSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True)
-    confirmation_code = serializers.CharField(required=True)
+    username = serializers.CharField()
+    confirmation_code = serializers.CharField()
 
     class Meta:
         fields = ('username', 'confirmation_code')

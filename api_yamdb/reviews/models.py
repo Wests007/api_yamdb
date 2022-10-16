@@ -15,15 +15,11 @@ ROLES_CHOICES = [
 class User(AbstractUser):
     username = models.CharField(
         max_length=150,
-        unique=True,
-        blank=False,
-        null=False
+        unique=True
     )
     email = models.EmailField(
         max_length=254,
-        unique=True,
-        blank=False,
-        null=False
+        unique=True
     )
     first_name = models.CharField(max_length=150, blank=True)
     last_name = models.CharField(max_length=150, blank=True)
@@ -34,10 +30,7 @@ class User(AbstractUser):
     role = models.CharField(max_length=9, choices=ROLES_CHOICES, default=USER)
     confirmation_code = models.CharField(
         'код подтверждения',
-        max_length=255,
-        null=True,
-        blank=False,
-        default='UNKNOWN'
+        max_length=255
     )
 
     class Meta:
@@ -67,12 +60,10 @@ class User(AbstractUser):
 class Genre(models.Model):
     name = models.TextField(
         'Название',
-        blank=False,
         max_length=150
     )
     slug = models.SlugField(
         'Slug',
-        blank=False,
         unique=True,
         db_index=True
     )
@@ -83,18 +74,16 @@ class Genre(models.Model):
         verbose_name_plural = 'Жанры'
 
     def __str__(self):
-        return self.name[0:10]
+        return self.name[:10]
 
 
 class Category(models.Model):
     name = models.TextField(
         'Название',
-        blank=False,
         max_length=150
     )
     slug = models.SlugField(
         'Slug',
-        blank=False,
         unique=True,
         db_index=True
     )
@@ -105,13 +94,12 @@ class Category(models.Model):
         verbose_name_plural = 'Категории'
 
     def __str__(self):
-        return self.name[0:10]
+        return self.name[:10]
 
 
 class Title(models.Model):
     name = models.TextField(
         'Название',
-        blank=False,
         max_length=200,
         db_index=True
     )
@@ -127,7 +115,6 @@ class Title(models.Model):
     genre = models.ManyToManyField(
         Genre,
         blank=True,
-        db_index=True,
         related_name='titles',
         verbose_name='Жанр'
     )
@@ -144,7 +131,7 @@ class Title(models.Model):
         verbose_name_plural = 'Произведения'
 
     def __str__(self):
-        return self.name[0:10]
+        return self.name[:10]
 
 
 class GenreTitle(models.Model):
@@ -206,7 +193,7 @@ class Review(models.Model):
         ]
 
     def __str__(self):
-        return self.text[0:10]
+        return self.text[:10]
 
 
 class Comment(models.Model):
@@ -233,4 +220,4 @@ class Comment(models.Model):
         verbose_name_plural = 'Комментарии на отзывы'
 
     def __str__(self):
-        return self.text[0:10]
+        return self.text[:10]

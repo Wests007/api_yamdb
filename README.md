@@ -141,6 +141,6 @@ POST /api/v1/titles/{title_id}/reviews/{review_id}/comments/
 ```
 
 ## Авторы:
-[Асеев Александр](https://github.com/VANGAZOR)
-[Гриднев Кирилл](https://github.com/Keyreall96)
+[Асеев Александр](https://github.com/VANGAZOR),
+[Гриднев Кирилл](https://github.com/Keyreall96),
 [Ромашков Александр](https://github.com/Wests007)
